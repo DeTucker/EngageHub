@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Response, status
 from fastapi.security import OAuth2PasswordBearer
 from datetime import timedelta
 from app.database import db
@@ -58,3 +58,15 @@ async def get_profile(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=404, detail="User not found")
 
     return UserPublic(**user)
+
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+def logout(response: Response):
+    """
+    Invalidate server-side session/token and clear auth cookies.
+    Add DB/session invalidation here if you store sessions server-side.
+    """
+    # Example cookie names — adjust to your implementation
+    response.delete_cookie(key="access_token", path="/")
+    response.delete_cookie(key="refresh_token", path="/")
+    response.delete_cookie(key="session", path="/")
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

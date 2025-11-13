@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 #middlewares
 from app.core.middleware import setup_middlewares
@@ -18,6 +19,14 @@ setup_middlewares(app)
 @app.on_event("startup")
 async def startup_db():
     await init_db()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # adjust frontend origin
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(auth.router)
 
