@@ -54,10 +54,10 @@ function Login() {
       });
 
       // ✅ Redirect based on role
-      if (res.data.user.role === "employee") {
-        navigate("/dashboard/employee/profile");
-      } else if (res.data.user.role === "hr_manager") {
-        navigate("/dashboard/hr");
+      if (res.data.user.is_hr) {
+        navigate("/dashboard/hr/overview");
+      } else if (res.data.user.role === "employee") {
+        navigate("/dashboard/employee/tasks");
       } else {
         setMessage("Unknown role. Contact admin.");
         setMessageType("error");

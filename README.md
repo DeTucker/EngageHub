@@ -193,15 +193,21 @@ Once the backend is running, visit:
 
 ## 👥 User Roles
 
+### First User (Automatic HR Manager)
+- **The first user to register** automatically becomes an HR Manager
+- This user is auto-approved and has full administrative access
+- No manual configuration required
+
 ### Employee
-- Default role for new registrations
+- Default role for all subsequent registrations
 - Requires HR approval before accessing dashboard
 - Can manage own tasks, leaves, and view performance/rewards
 
 ### HR Manager
-- Set `is_hr: true` in MongoDB user document
+- First registered user gets this role automatically
 - Full access to all management features
 - Can approve employees, assign tasks, review performance
+- Additional HR managers can be promoted by updating `is_hr: true` in MongoDB user document
 
 ---
 

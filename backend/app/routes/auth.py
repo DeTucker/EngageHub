@@ -17,13 +17,22 @@ async def signup(user: UserCreate):
     if existing:
         raise HTTPException(status_code=400, detail="User already exists")
 
+    # Check if this is the first user in the system
+    user_count = await db.users.count_documents({})
+    is_first_user = user_count == 0
+    
     new_user = UserInDB(
         email=user.email,
         password=hash_password(user.password),
         full_name=user.full_name,
+        is_hr=is_first_user,  # First user becomes HR manager
+        is_approved=is_first_user  # First user is auto-approved
     )
 
     await db.users.insert_one(new_user.dict())
+    
+    if is_first_user:
+        return {"message": "User created successfully as HR Manager ✅"}
     return {"message": "User created successfully ✅"}
 
 @router.post("/login")
@@ -44,6 +53,7 @@ async def login(user: UserLogin):
             "email": db_user["email"],
             "full_name": db_user["full_name"],
             "role": db_user["role"],
+            "is_hr": db_user.get("is_hr", False),
             "is_approved": db_user.get("is_approved", False)
         }
     }
