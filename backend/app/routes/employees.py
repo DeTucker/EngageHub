@@ -38,6 +38,9 @@ async def get_my_profile(current_user: dict = Depends(get_current_user)):
 @router.put("/me")
 async def update_my_profile(
     full_name: Optional[str] = None,
+    department: Optional[str] = None,
+    phone: Optional[str] = None,
+    date_of_joining: Optional[str] = None,
     current_user: dict = Depends(get_current_user)
 ):
     """Update current user's profile"""
@@ -46,6 +49,16 @@ async def update_my_profile(
     
     if full_name:
         update_data["full_name"] = full_name
+    if department:
+        update_data["department"] = department
+    if phone:
+        update_data["phone"] = phone
+    if date_of_joining:
+        try:
+            # Parse date string to datetime
+            update_data["date_of_joining"] = datetime.fromisoformat(date_of_joining.replace('Z', '+00:00'))
+        except:
+            pass
     
     await db.users.update_one(
         {"_id": current_user["_id"]},
@@ -53,6 +66,7 @@ async def update_my_profile(
     )
     
     updated_user = await db.users.find_one({"_id": current_user["_id"]})
+    updated_user["id"] = str(updated_user["_id"])
     
     return {
         "message": "Profile updated successfully",

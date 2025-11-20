@@ -11,7 +11,10 @@ export default function Profile() {
   const [error, setError] = useState("");
   
   const [formData, setFormData] = useState({
-    full_name: ""
+    full_name: "",
+    department: "",
+    phone: "",
+    date_of_joining: ""
   });
   
   const [passwordData, setPasswordData] = useState({
@@ -28,7 +31,12 @@ export default function Profile() {
     try {
       const res = await getMyProfile();
       setUser(res.data);
-      setFormData({ full_name: res.data.full_name });
+      setFormData({ 
+        full_name: res.data.full_name,
+        department: res.data.department || "",
+        phone: res.data.phone || "",
+        date_of_joining: res.data.date_of_joining ? res.data.date_of_joining.split('T')[0] : ""
+      });
       setLoading(false);
     } catch (err) {
       setError(err.response?.data?.detail || "Failed to load profile");
@@ -163,6 +171,44 @@ export default function Profile() {
                   required
                 />
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Department
+                </label>
+                <input
+                  type="text"
+                  value={formData.department}
+                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                  placeholder="e.g., Engineering, Sales, HR"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  placeholder="e.g., +254712345678"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Date of Joining
+                </label>
+                <input
+                  type="date"
+                  value={formData.date_of_joining}
+                  onChange={(e) => setFormData({ ...formData, date_of_joining: e.target.value })}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                />
+              </div>
               
               <div className="flex space-x-3">
                 <button
@@ -176,7 +222,12 @@ export default function Profile() {
                   type="button"
                   onClick={() => {
                     setEditing(false);
-                    setFormData({ full_name: user.full_name });
+                    setFormData({ 
+                      full_name: user.full_name,
+                      department: user.department || "",
+                      phone: user.phone || "",
+                      date_of_joining: user.date_of_joining ? user.date_of_joining.split('T')[0] : ""
+                    });
                     setError("");
                   }}
                   className="flex items-center space-x-2 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
@@ -195,6 +246,35 @@ export default function Profile() {
                   <p className="text-gray-800">{user.email}</p>
                 </div>
               </div>
+              
+              <div className="flex items-center space-x-3">
+                <User className="text-gray-400" size={20} />
+                <div>
+                  <p className="text-sm text-gray-500">Department</p>
+                  <p className="text-gray-800">{user.department || "Not specified"}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <Mail className="text-gray-400" size={20} />
+                <div>
+                  <p className="text-sm text-gray-500">Phone</p>
+                  <p className="text-gray-800">{user.phone || "Not specified"}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <User className="text-gray-400" size={20} />
+                <div>
+                  <p className="text-sm text-gray-500">Date of Joining</p>
+                  <p className="text-gray-800">
+                    {user.date_of_joining 
+                      ? new Date(user.date_of_joining).toLocaleDateString()
+                      : "Not specified"}
+                  </p>
+                </div>
+              </div>
+
               <div className="flex items-center space-x-3">
                 <Shield className="text-gray-400" size={20} />
                 <div>

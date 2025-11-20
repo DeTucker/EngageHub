@@ -24,4 +24,7 @@ class UserPublic(BaseModel):
     email: EmailStr
     full_name: str
     role: str
+    department: Optional[str] = None
+    phone: Optional[str] = None
+    date_of_joining: Optional[datetime] = None
     created_at: Optional[datetime]
