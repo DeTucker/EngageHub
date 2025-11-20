@@ -74,76 +74,89 @@ export default function EmployeeDashboard() {
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
-          <NavLink
-            to="rewards"
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                isActive
-                  ? "bg-white text-indigo-600 shadow-lg"
-                  : "text-indigo-100 hover:bg-white/10 hover:text-white"
-              }`
-            }
-          >
-            <Award className="w-5 h-5" />
-            <span className="font-medium">Track Rewards</span>
-          </NavLink>
+        <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
+          {/* Work Management Section */}
+          <div className="mb-4">
+            <p className="text-xs font-semibold text-indigo-300 uppercase tracking-wider px-4 mb-2">Work Management</p>
+            
+            <NavLink
+              to="tasks"
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                  isActive
+                    ? "bg-white text-indigo-600 shadow-lg scale-105"
+                    : "text-indigo-100 hover:bg-white/10 hover:text-white hover:scale-102"
+                }`
+              }
+            >
+              <CheckSquare className="w-5 h-5" />
+              <span className="font-medium">My Tasks</span>
+            </NavLink>
 
-          <NavLink
-            to="performance"
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                isActive
-                  ? "bg-white text-indigo-600 shadow-lg"
-                  : "text-indigo-100 hover:bg-white/10 hover:text-white"
-              }`
-            }
-          >
-            <TrendingUp className="w-5 h-5" />
-            <span className="font-medium">View Performance</span>
-          </NavLink>
+            <NavLink
+              to="performance"
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                  isActive
+                    ? "bg-white text-indigo-600 shadow-lg scale-105"
+                    : "text-indigo-100 hover:bg-white/10 hover:text-white hover:scale-102"
+                }`
+              }
+            >
+              <TrendingUp className="w-5 h-5" />
+              <span className="font-medium">Performance</span>
+            </NavLink>
 
-          <NavLink
-            to="tasks"
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                isActive
-                  ? "bg-white text-indigo-600 shadow-lg"
-                  : "text-indigo-100 hover:bg-white/10 hover:text-white"
-              }`
-            }
-          >
-            <CheckSquare className="w-5 h-5" />
-            <span className="font-medium">My Tasks</span>
-          </NavLink>
+            <NavLink
+              to="rewards"
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                  isActive
+                    ? "bg-white text-indigo-600 shadow-lg scale-105"
+                    : "text-indigo-100 hover:bg-white/10 hover:text-white hover:scale-102"
+                }`
+              }
+            >
+              <Award className="w-5 h-5" />
+              <span className="font-medium">Rewards</span>
+            </NavLink>
+          </div>
 
-          <NavLink
-            to="profile"
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                isActive
-                  ? "bg-white text-indigo-600 shadow-lg"
-                  : "text-indigo-100 hover:bg-white/10 hover:text-white"
-              }`
-            }
-          >
-            <User className="w-5 h-5" />
-            <span className="font-medium">Update Profile</span>
-          </NavLink>
+          {/* Divider */}
+          <div className="h-px bg-white/20 my-3 mx-4"></div>
 
-          <NavLink
-            to="leave"
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                isActive
-                  ? "bg-white text-indigo-600 shadow-lg"
-                  : "text-indigo-100 hover:bg-white/10 hover:text-white"
-              }`
-            }
-          >
-            <Calendar className="w-5 h-5" />
-            <span className="font-medium">Submit Leave</span>
-          </NavLink>
+          {/* Personal Section */}
+          <div>
+            <p className="text-xs font-semibold text-indigo-300 uppercase tracking-wider px-4 mb-2">Personal</p>
+            
+            <NavLink
+              to="profile"
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                  isActive
+                    ? "bg-white text-indigo-600 shadow-lg scale-105"
+                    : "text-indigo-100 hover:bg-white/10 hover:text-white hover:scale-102"
+                }`
+              }
+            >
+              <User className="w-5 h-5" />
+              <span className="font-medium">My Profile</span>
+            </NavLink>
+
+            <NavLink
+              to="leave"
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                  isActive
+                    ? "bg-white text-indigo-600 shadow-lg scale-105"
+                    : "text-indigo-100 hover:bg-white/10 hover:text-white hover:scale-102"
+                }`
+              }
+            >
+              <Calendar className="w-5 h-5" />
+              <span className="font-medium">Leave Requests</span>
+            </NavLink>
+          </div>
         </nav>
 
         {/* Logout Button */}
