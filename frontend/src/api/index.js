@@ -200,4 +200,39 @@ export const getRewardsStatistics = () => {
   return API.get("/rewards/statistics");
 };
 
+// ============================================
+// TASKS
+// ============================================
+
+// Get my tasks (Employee)
+export const getMyTasks = (statusFilter = null) => {
+  const params = statusFilter ? { status: statusFilter } : {};
+  return API.get("/tasks/my-tasks", { params });
+};
+
+// Update task status/report (Employee)
+export const updateTask = (taskId, data) => {
+  return API.patch(`/tasks/${taskId}`, data);
+};
+
+// Create task (HR only)
+export const createTask = (taskData) => {
+  return API.post("/tasks/", taskData);
+};
+
+// Get all tasks (HR only)
+export const getAllTasks = (params = {}) => {
+  return API.get("/tasks/all", { params });
+};
+
+// Get task statistics (HR only)
+export const getTaskStatistics = () => {
+  return API.get("/tasks/statistics");
+};
+
+// Delete task (HR only)
+export const deleteTask = (taskId) => {
+  return API.delete(`/tasks/${taskId}`);
+};
+
 export default API;

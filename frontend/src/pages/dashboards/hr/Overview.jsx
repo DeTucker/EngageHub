@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { getEmployeeStatistics, getLeaveStatistics } from "../../../api";
-import { Users, Award, CalendarCheck, TrendingUp, Shield, Clock } from "lucide-react";
+import { getEmployeeStatistics, getLeaveStatistics, getTaskStatistics } from "../../../api";
+import { Users, Award, CalendarCheck, TrendingUp, Shield, Clock, CheckSquare, AlertCircle } from "lucide-react";
 
 export default function Overview() {
   const [loading, setLoading] = useState(true);
@@ -11,6 +11,7 @@ export default function Overview() {
     total_hr: 0
   });
   const [leaveStats, setLeaveStats] = useState(null);
+  const [taskStats, setTaskStats] = useState(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -19,12 +20,14 @@ export default function Overview() {
 
   const fetchStats = async () => {
     try {
-      const [employeeRes, leaveRes] = await Promise.all([
+      const [employeeRes, leaveRes, taskRes] = await Promise.all([
         getEmployeeStatistics(),
-        getLeaveStatistics()
+        getLeaveStatistics(),
+        getTaskStatistics()
       ]);
       setStats(employeeRes.data);
       setLeaveStats(leaveRes.data);
+      setTaskStats(taskRes.data);
       setLoading(false);
     } catch (err) {
       setError(err.response?.data?.detail || "Failed to load statistics");
@@ -144,6 +147,43 @@ export default function Overview() {
                 <p className="text-xs text-gray-500">{item.count} requests</p>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Task Statistics */}
+      {taskStats && (
+        <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg p-8 mb-8 border border-gray-100">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+            <CheckSquare className="w-6 h-6 text-indigo-600" />
+            Task Management Overview
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="group bg-gradient-to-br from-indigo-50 to-purple-50 p-5 rounded-xl border-2 border-indigo-100 hover:border-indigo-300 hover:shadow-lg transition-all duration-300">
+              <p className="text-xs font-semibold text-gray-600 uppercase mb-2 tracking-wide">Total Tasks</p>
+              <p className="text-3xl font-bold text-indigo-600 mb-1">{taskStats.total_tasks}</p>
+              <p className="text-xs text-gray-500">All tasks</p>
+            </div>
+            <div className="group bg-gradient-to-br from-yellow-50 to-orange-50 p-5 rounded-xl border-2 border-yellow-100 hover:border-yellow-300 hover:shadow-lg transition-all duration-300">
+              <p className="text-xs font-semibold text-gray-600 uppercase mb-2 tracking-wide">Pending</p>
+              <p className="text-3xl font-bold text-yellow-600 mb-1">{taskStats.pending}</p>
+              <p className="text-xs text-gray-500">Not started</p>
+            </div>
+            <div className="group bg-gradient-to-br from-blue-50 to-cyan-50 p-5 rounded-xl border-2 border-blue-100 hover:border-blue-300 hover:shadow-lg transition-all duration-300">
+              <p className="text-xs font-semibold text-gray-600 uppercase mb-2 tracking-wide">In Progress</p>
+              <p className="text-3xl font-bold text-blue-600 mb-1">{taskStats.in_progress}</p>
+              <p className="text-xs text-gray-500">Active</p>
+            </div>
+            <div className="group bg-gradient-to-br from-green-50 to-emerald-50 p-5 rounded-xl border-2 border-green-100 hover:border-green-300 hover:shadow-lg transition-all duration-300">
+              <p className="text-xs font-semibold text-gray-600 uppercase mb-2 tracking-wide">Completed</p>
+              <p className="text-3xl font-bold text-green-600 mb-1">{taskStats.completed}</p>
+              <p className="text-xs text-gray-500">Done</p>
+            </div>
+            <div className="group bg-gradient-to-br from-red-50 to-rose-50 p-5 rounded-xl border-2 border-red-100 hover:border-red-300 hover:shadow-lg transition-all duration-300">
+              <p className="text-xs font-semibold text-gray-600 uppercase mb-2 tracking-wide">Overdue</p>
+              <p className="text-3xl font-bold text-red-600 mb-1">{taskStats.overdue}</p>
+              <p className="text-xs text-gray-500">Past due</p>
+            </div>
           </div>
         </div>
       )}

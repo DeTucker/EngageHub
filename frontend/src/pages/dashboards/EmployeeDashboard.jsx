@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
-import { Award, TrendingUp, User, Calendar, LogOut, Menu } from "lucide-react";
+import { Award, TrendingUp, User, Calendar, LogOut, Menu, CheckSquare } from "lucide-react";
 import PendingApproval from "../../components/PendingApproval";
 
 export default function EmployeeDashboard() {
@@ -101,6 +101,20 @@ export default function EmployeeDashboard() {
           >
             <TrendingUp className="w-5 h-5" />
             <span className="font-medium">View Performance</span>
+          </NavLink>
+
+          <NavLink
+            to="tasks"
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                isActive
+                  ? "bg-white text-indigo-600 shadow-lg"
+                  : "text-indigo-100 hover:bg-white/10 hover:text-white"
+              }`
+            }
+          >
+            <CheckSquare className="w-5 h-5" />
+            <span className="font-medium">My Tasks</span>
           </NavLink>
 
           <NavLink
