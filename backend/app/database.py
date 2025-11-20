@@ -1,16 +1,18 @@
 import motor.motor_asyncio
-from dotenv import load_dotenv
-import os
+from app.config import settings
 
-load_dotenv()
-
-MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
-MONGO_DB = os.getenv("MONGO_DB", "employee_tracker")
-
-client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URL)
-db = client[MONGO_DB]
+client = motor.motor_asyncio.AsyncIOMotorClient(settings.MONGO_URL)
+db = client[settings.MONGO_DB]
 
 async def init_db():
-    # Example: check connection
+    # Check connection
     await db.command("ping")
     print("✅ Connected to MongoDB")
+    
+    # Create indexes
+    await db.users.create_index("email", unique=True)
+    await db.leaves.create_index("user_id")
+    await db.leaves.create_index("status")
+    await db.performance.create_index("employee_id")
+    await db.rewards.create_index("recipient_id")
+    print("✅ Database indexes created")

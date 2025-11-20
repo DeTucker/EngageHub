@@ -1,70 +1,27 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { getAllLeaves, updateLeaveStatus } from "../../../api";
 
 /**
  * LeaveRequests
  *
  * Features:
- * - Search by name or role
- * - Filter by status (All / Pending / Approved / Denied)
- * - Table with requester avatar initials, dates, type, status, and actions
+ * - Fetch all leaves from backend
+ * - Search by name or type
+ * - Filter by status (All / pending / approved / rejected)
+ * - Table with requester details, dates, type, status, and actions
  * - View details modal (reason, attachments placeholder)
- * - Approve / Deny actions with confirmation (client-side only / instant update)
- * - Simple previous/next pagination
+ * - Approve / Reject actions with backend update
  *
  * Styling: Tailwind CSS classes (matches your dashboard style)
  */
 
-const FAKE_DATA = [
-  {
-    id: "lr-001",
-    name: "Jane Doe",
-    role: "Operations Manager",
-    avatarColor: "bg-indigo-100 text-indigo-700",
-    startDate: "2025-11-03",
-    endDate: "2025-11-07",
-    type: "Annual Leave",
-    submittedAt: "2025-10-25T09:12:00",
-    status: "Pending",
-    reason:
-      "Family trip — planned months ago. Will be reachable by phone for emergencies.",
-  },
-  {
-    id: "lr-002",
-    name: "Samuel Otieno",
-    role: "Driver",
-    avatarColor: "bg-green-100 text-green-700",
-    startDate: "2025-10-30",
-    endDate: "2025-11-01",
-    type: "Sick Leave",
-    submittedAt: "2025-10-29T06:28:00",
-    status: "Pending",
-    reason: "Fever and flu symptoms. Visiting clinic today — will upload certificate.",
-  },
-  {
-    id: "lr-003",
-    name: "Aisha Mwangi",
-    role: "Logistics Coordinator",
-    avatarColor: "bg-yellow-100 text-yellow-700",
-    startDate: "2025-12-15",
-    endDate: "2025-12-22",
-    type: "Annual Leave",
-    submittedAt: "2025-10-15T14:00:00",
-    status: "Approved",
-    reason: "Holiday with family.",
-  },
-  {
-    id: "lr-004",
-    name: "Peter Kimani",
-    role: "Warehouse Assistant",
-    avatarColor: "bg-red-100 text-red-700",
-    startDate: "2025-11-10",
-    endDate: "2025-11-12",
-    type: "Personal Leave",
-    submittedAt: "2025-10-27T11:30:00",
-    status: "Denied",
-    reason: "Personal commitments.",
-  },
-  // add more fake entries if you like
+const AVATAR_COLORS = [
+  "bg-indigo-100 text-indigo-700",
+  "bg-green-100 text-green-700",
+  "bg-yellow-100 text-yellow-700",
+  "bg-red-100 text-red-700",
+  "bg-blue-100 text-blue-700",
+  "bg-purple-100 text-purple-700",
 ];
 
 function initials(name) {
@@ -86,57 +43,87 @@ function formatDate(dateStr) {
   }
 }
 
-export default function LeaveRequests({ initialData = FAKE_DATA }) {
-  // Local data state
-  const [data, setData] = useState(initialData);
+export default function LeaveRequests() {
+  const [leaves, setLeaves] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
-  const [selected, setSelected] = useState(null); // for modal
-  const [confirmAction, setConfirmAction] = useState(null); // {id, action} when confirming approve/deny
-  const [page, setPage] = useState(1);
-  const PER_PAGE = 5;
+  const [selected, setSelected] = useState(null);
+  const [confirmAction, setConfirmAction] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  useEffect(() => {
+    fetchLeaves();
+  }, []);
+
+  const fetchLeaves = async () => {
+    try {
+      const res = await getAllLeaves();
+      setLeaves(res.data);
+      setLoading(false);
+    } catch (err) {
+      setError(err.response?.data?.detail || "Failed to load leave requests");
+      setLoading(false);
+    }
+  };
 
   // Derived filtered list
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return data.filter((r) => {
-      if (statusFilter !== "All" && r.status !== statusFilter) return false;
-      if (!q) return true;
-      return (
-        r.name.toLowerCase().includes(q) ||
-        r.role.toLowerCase().includes(q) ||
-        r.type.toLowerCase().includes(q)
-      );
+    return leaves.filter((item) => {
+      const matchesSearch =
+        item.user_name?.toLowerCase().includes(query.toLowerCase()) ||
+        item.leave_type?.toLowerCase().includes(query.toLowerCase());
+      const matchesStatus = statusFilter === "All" || item.status === statusFilter;
+      return matchesSearch && matchesStatus;
     });
-  }, [data, query, statusFilter]);
+  }, [leaves, query, statusFilter]);
 
-  const pageCount = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
-  const pageItems = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const statuses = ["All", "pending", "approved", "rejected"];
 
-  // Actions: approve / deny
-  function applyAction(id, action) {
-    // update status locally
-    setData((prev) =>
-      prev.map((r) =>
-        r.id === id
-          ? {
-              ...r,
-              status: action === "approve" ? "Approved" : "Denied",
-            }
-          : r
-      )
-    );
-    setConfirmAction(null);
-    // If the selected modal item was updated, refresh it
-    if (selected && selected.id === id) {
-      setSelected((s) => ({ ...s, status: action === "approve" ? "Approved" : "Denied" }));
+  // Actions: approve / reject
+  async function applyAction(id, action) {
+    setActionLoading(true);
+    try {
+      const newStatus = action === "approve" ? "approved" : "rejected";
+      await updateLeaveStatus(id, { status: newStatus });
+      // Refresh leaves after action
+      await fetchLeaves();
+      setConfirmAction(null);
+      if (selected && selected.id === id) {
+        setSelected(null);
+      }
+    } catch (err) {
+      alert(err.response?.data?.detail || "Failed to update leave status");
+    } finally {
+      setActionLoading(false);
     }
   }
 
   function clearAllFilters() {
     setQuery("");
     setStatusFilter("All");
-    setPage(1);
+  }
+
+  if (loading) {
+    return (
+      <div className="p-4 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading leave requests...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4">
+        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
+          {error}
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -163,28 +150,21 @@ export default function LeaveRequests({ initialData = FAKE_DATA }) {
           <div className="flex items-center gap-3 w-full md:w-auto">
             <input
               value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setPage(1);
-              }}
-              placeholder="Search by name, role or type..."
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by name or type..."
               className="w-full md:w-64 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200"
               aria-label="Search leave requests"
             />
 
             <select
               value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setPage(1);
-              }}
+              onChange={(e) => setStatusFilter(e.target.value)}
               className="px-3 py-2 border rounded-md"
               aria-label="Filter by status"
             >
-              <option>All</option>
-              <option>Pending</option>
-              <option>Approved</option>
-              <option>Denied</option>
+              {statuses.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
             </select>
           </div>
 
@@ -208,116 +188,96 @@ export default function LeaveRequests({ initialData = FAKE_DATA }) {
             </tr>
           </thead>
           <tbody>
-            {pageItems.length === 0 ? (
+            {filtered.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
                   No leave requests found.
                 </td>
               </tr>
             ) : (
-              pageItems.map((r) => (
-                <tr key={r.id} className="border-t">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`h-10 w-10 rounded-full flex items-center justify-center font-medium ${r.avatarColor}`}
-                        aria-hidden
-                      >
-                        {initials(r.name)}
+              filtered.map((r, idx) => {
+                const colorClass = AVATAR_COLORS[idx % AVATAR_COLORS.length];
+                return (
+                  <tr key={r.id} className="border-t">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`h-10 w-10 rounded-full flex items-center justify-center font-medium ${colorClass}`}
+                          aria-hidden
+                        >
+                          {initials(r.user_name)}
+                        </div>
+                        <div>
+                          <div className="text-sm font-semibold text-gray-900">{r.user_name}</div>
+                          <div className="text-xs text-gray-500">{r.user_email}</div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="text-sm font-semibold text-gray-900">{r.name}</div>
-                        <div className="text-xs text-gray-500">{r.role}</div>
-                      </div>
-                    </div>
-                  </td>
+                    </td>
 
-                  <td className="px-4 py-3 text-sm text-gray-600">
-                    {formatDate(r.startDate)} — {formatDate(r.endDate)}
-                  </td>
+                    <td className="px-4 py-3 text-sm text-gray-600">
+                      {formatDate(r.start_date)} — {formatDate(r.end_date)}
+                    </td>
 
-                  <td className="px-4 py-3 text-sm text-gray-600">{r.type}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600 capitalize">{r.leave_type}</td>
 
-                  <td className="px-4 py-3 text-sm text-gray-600">
-                    {new Date(r.submittedAt).toLocaleString()}
-                  </td>
+                    <td className="px-4 py-3 text-sm text-gray-600">
+                      {new Date(r.created_at).toLocaleString()}
+                    </td>
 
-                  <td className="px-4 py-3">
-                    <span
-                      className={
-                        "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium " +
-                        (r.status === "Pending"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : r.status === "Approved"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800")
-                      }
-                      aria-label={`Status ${r.status}`}
-                    >
-                      {r.status}
-                    </span>
-                  </td>
-
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => setSelected(r)}
-                        className="px-3 py-1 text-sm rounded-md border hover:bg-gray-50"
-                        aria-label={`View details for ${r.name}`}
+                    <td className="px-4 py-3">
+                      <span
+                        className={
+                          "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium capitalize " +
+                          (r.status === "pending"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : r.status === "approved"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800")
+                        }
+                        aria-label={`Status ${r.status}`}
                       >
-                        View
-                      </button>
+                        {r.status}
+                      </span>
+                    </td>
 
-                      {r.status === "Pending" ? (
-                        <>
-                          <button
-                            onClick={() => setConfirmAction({ id: r.id, action: "approve" })}
-                            className="px-3 py-1 text-sm rounded-md bg-green-600 text-white"
-                            aria-label={`Approve ${r.name}`}
-                          >
-                            Approve
-                          </button>
-                          <button
-                            onClick={() => setConfirmAction({ id: r.id, action: "deny" })}
-                            className="px-3 py-1 text-sm rounded-md bg-red-600 text-white"
-                            aria-label={`Deny ${r.name}`}
-                          >
-                            Deny
-                          </button>
-                        </>
-                      ) : (
-                        <span className="text-xs text-gray-500 italic">{r.status}</span>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => setSelected(r)}
+                          className="px-3 py-1 text-sm rounded-md border hover:bg-gray-50"
+                          aria-label={`View details for ${r.user_name}`}
+                        >
+                          View
+                        </button>
+
+                        {r.status === "pending" ? (
+                          <>
+                            <button
+                              onClick={() => setConfirmAction({ id: r.id, action: "approve" })}
+                              className="px-3 py-1 text-sm rounded-md bg-green-600 text-white hover:bg-green-700"
+                              aria-label={`Approve ${r.user_name}`}
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => setConfirmAction({ id: r.id, action: "reject" })}
+                              className="px-3 py-1 text-sm rounded-md bg-red-600 text-white hover:bg-red-700"
+                              aria-label={`Reject ${r.user_name}`}
+                            >
+                              Reject
+                            </button>
+                          </>
+                        ) : (
+                          <span className="text-xs text-gray-500 italic capitalize">{r.status}</span>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
-
-        {/* Pagination footer */}
-        <div className="flex items-center justify-between px-4 py-3 border-t">
-          <div className="text-sm text-gray-600">
-            Page {page} of {pageCount}
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="px-3 py-1 rounded-md border disabled:opacity-50"
-            >
-              Previous
-            </button>
-            <button
-              onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
-              disabled={page === pageCount}
-              className="px-3 py-1 rounded-md border disabled:opacity-50"
-            >
-              Next
-            </button>
-          </div>
-        </div>
       </div>
 
       {/* Details modal */}
@@ -335,8 +295,8 @@ export default function LeaveRequests({ initialData = FAKE_DATA }) {
           <div className="relative max-w-2xl w-full bg-white rounded-lg shadow-lg p-6 z-50">
             <header className="flex items-start justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">{selected.name}</h2>
-                <p className="text-sm text-gray-500">{selected.role}</p>
+                <h2 className="text-lg font-semibold text-gray-900">{selected.user_name}</h2>
+                <p className="text-sm text-gray-500">{selected.user_email}</p>
               </div>
               <button
                 onClick={() => setSelected(null)}
@@ -351,29 +311,41 @@ export default function LeaveRequests({ initialData = FAKE_DATA }) {
               <div>
                 <div className="text-xs text-gray-400">Leave dates</div>
                 <div className="font-medium">
-                  {formatDate(selected.startDate)} — {formatDate(selected.endDate)}
+                  {formatDate(selected.start_date)} — {formatDate(selected.end_date)}
                 </div>
               </div>
 
               <div>
                 <div className="text-xs text-gray-400">Type</div>
-                <div className="font-medium">{selected.type}</div>
-              </div>
-
-              <div className="md:col-span-2">
-                <div className="text-xs text-gray-400">Reason</div>
-                <p className="mt-1 text-gray-800">{selected.reason}</p>
+                <div className="font-medium capitalize">{selected.leave_type}</div>
               </div>
 
               <div>
-                <div className="text-xs text-gray-400">Submitted</div>
-                <div>{new Date(selected.submittedAt).toLocaleString()}</div>
+                <div className="text-xs text-gray-400">Days</div>
+                <div className="font-medium">{selected.days_count} days</div>
               </div>
 
               <div>
                 <div className="text-xs text-gray-400">Status</div>
-                <div>{selected.status}</div>
+                <div className="font-medium capitalize">{selected.status}</div>
               </div>
+
+              <div className="md:col-span-2">
+                <div className="text-xs text-gray-400">Reason</div>
+                <p className="mt-1 text-gray-800">{selected.reason || "No reason provided"}</p>
+              </div>
+
+              <div>
+                <div className="text-xs text-gray-400">Submitted</div>
+                <div>{new Date(selected.created_at).toLocaleString()}</div>
+              </div>
+
+              {selected.updated_at && (
+                <div>
+                  <div className="text-xs text-gray-400">Last updated</div>
+                  <div>{new Date(selected.updated_at).toLocaleString()}</div>
+                </div>
+              )}
             </section>
 
             <footer className="mt-6 flex items-center justify-end gap-2">
@@ -384,17 +356,17 @@ export default function LeaveRequests({ initialData = FAKE_DATA }) {
                 Close
               </button>
 
-              {selected.status === "Pending" && (
+              {selected.status === "pending" && (
                 <>
                   <button
-                    onClick={() => setConfirmAction({ id: selected.id, action: "deny" })}
-                    className="px-3 py-1 rounded-md bg-red-600 text-white"
+                    onClick={() => setConfirmAction({ id: selected.id, action: "reject" })}
+                    className="px-3 py-1 rounded-md bg-red-600 text-white hover:bg-red-700"
                   >
-                    Deny
+                    Reject
                   </button>
                   <button
                     onClick={() => setConfirmAction({ id: selected.id, action: "approve" })}
-                    className="px-3 py-1 rounded-md bg-green-600 text-white"
+                    className="px-3 py-1 rounded-md bg-green-600 text-white hover:bg-green-700"
                   >
                     Approve
                   </button>
@@ -405,32 +377,34 @@ export default function LeaveRequests({ initialData = FAKE_DATA }) {
         </div>
       )}
 
-      {/* Confirm dialog (simple inline) */}
+      {/* Confirm dialog */}
       {confirmAction && (
         <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/30" onClick={() => setConfirmAction(null)} />
           <div className="relative bg-white rounded-lg shadow-lg p-5 max-w-md w-full z-10">
             <h3 className="text-lg font-semibold text-gray-900">
-              Confirm {confirmAction.action === "approve" ? "Approve" : "Deny"}
+              Confirm {confirmAction.action === "approve" ? "Approve" : "Reject"}
             </h3>
             <p className="mt-2 text-sm text-gray-600">
               Are you sure you want to{" "}
-              <strong>{confirmAction.action === "approve" ? "approve" : "deny"}</strong> this leave
-              request? This action updates the request status locally.
+              <strong>{confirmAction.action === "approve" ? "approve" : "reject"}</strong> this leave
+              request? This action will update the database.
             </p>
 
             <div className="mt-4 flex justify-end gap-2">
               <button
                 onClick={() => setConfirmAction(null)}
                 className="px-3 py-1 rounded-md border"
+                disabled={actionLoading}
               >
                 Cancel
               </button>
               <button
                 onClick={() => applyAction(confirmAction.id, confirmAction.action)}
-                className="px-3 py-1 rounded-md bg-blue-600 text-white"
+                className="px-3 py-1 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                disabled={actionLoading}
               >
-                Yes, {confirmAction.action === "approve" ? "Approve" : "Deny"}
+                {actionLoading ? "Processing..." : `Yes, ${confirmAction.action === "approve" ? "Approve" : "Reject"}`}
               </button>
             </div>
           </div>
