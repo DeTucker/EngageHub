@@ -49,7 +49,7 @@ export default function Signup() {
         password,
       });
 
-      setSuccess("✅ Account created successfully!");
+      setSuccess("✅ Account created successfully! You'll be redirected to login. Your account requires HR approval before you can access the dashboard.");
       setForm({
         fullName: "",
         phone: "",
@@ -60,7 +60,7 @@ export default function Signup() {
 
       console.log(res.data);
       // Redirect to login after success
-      setTimeout(() => navigate("/login"), 1500);
+      setTimeout(() => navigate("/login"), 3000);
     } catch (err) {
       let errorMessage = "❌ Signup failed. Try again.";
 

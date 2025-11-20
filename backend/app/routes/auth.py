@@ -43,7 +43,8 @@ async def login(user: UserLogin):
         "user": {
             "email": db_user["email"],
             "full_name": db_user["full_name"],
-            "role": db_user["role"]
+            "role": db_user["role"],
+            "is_approved": db_user.get("is_approved", False)
         }
     }
 

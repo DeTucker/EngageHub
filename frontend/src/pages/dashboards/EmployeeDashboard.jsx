@@ -2,6 +2,7 @@ import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { Award, TrendingUp, User, Calendar, LogOut, Menu } from "lucide-react";
+import PendingApproval from "../../components/PendingApproval";
 
 export default function EmployeeDashboard() {
   const navigate = useNavigate();
@@ -11,7 +12,14 @@ export default function EmployeeDashboard() {
     const storedUser = Cookies.get("user");
     if (storedUser) {
       try {
-        setUser(JSON.parse(storedUser));
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        
+        // Check if user is not approved and redirect
+        if (parsedUser.is_approved === false) {
+          // User is not approved, show pending approval screen
+          return;
+        }
       } catch (e) {
         console.error("Error parsing user cookie:", e);
       }
@@ -19,6 +27,11 @@ export default function EmployeeDashboard() {
       navigate("/login"); // redirect if not logged in
     }
   }, [navigate]);
+
+  // If user is not approved, show pending approval screen
+  if (user && user.is_approved === false) {
+    return <PendingApproval />;
+  }
 
   const handleLogout = () => {
     Cookies.remove("access_token");

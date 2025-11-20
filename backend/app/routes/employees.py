@@ -272,3 +272,56 @@ async def get_employee_summary(
         "performance": performance_summary,
         "rewards": rewards_summary
     }
+
+# -------------------
+# Employee Approval Endpoints
+# -------------------
+@router.post("/{employee_id}/approve")
+async def approve_employee(
+    employee_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """HR Manager approves an employee account"""
+    
+    check_hr_role(current_user)
+    
+    try:
+        obj_id = ObjectId(employee_id)
+    except:
+        raise HTTPException(status_code=400, detail="Invalid employee ID")
+    
+    employee = await db.users.find_one({"_id": obj_id})
+    if not employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    
+    if employee.get("is_approved", False):
+        raise HTTPException(status_code=400, detail="Employee is already approved")
+    
+    # Approve the employee
+    await db.users.update_one(
+        {"_id": obj_id},
+        {"$set": {"is_approved": True, "approved_at": datetime.utcnow()}}
+    )
+    
+    return {"message": "Employee approved successfully", "employee_id": employee_id}
+
+@router.get("/pending/list", response_model=List[UserPublic])
+async def get_pending_employees(
+    current_user: dict = Depends(get_current_user)
+):
+    """HR Manager gets list of employees pending approval"""
+    
+    check_hr_role(current_user)
+    
+    # Find employees who are not approved
+    pending_employees = await db.users.find({
+        "role": "employee",
+        "is_approved": False
+    }).sort("created_at", -1).to_list(100)
+    
+    # Convert _id to id string
+    for emp in pending_employees:
+        emp["id"] = str(emp["_id"])
+    
+    return [UserPublic(**emp) for emp in pending_employees]
+

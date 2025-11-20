@@ -17,6 +17,7 @@ import LeaveRequests from "./pages/dashboards/hr/LeaveRequests";
 import PerformanceTracking from "./pages/dashboards/hr/PerformanceTracking";
 import Settings from "./pages/dashboards/hr/Settings";
 import ManageRewards from "./pages/dashboards/hr/ManageRewards";
+import ApproveEmployees from "./pages/dashboards/hr/ApproveEmployees";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
         <Route path="/dashboard/hr" element={<HRDashboard />}>
           <Route path="overview" element={<Overview />} />
           <Route path="employees" element={<ManageEmployees />} />
+          <Route path="approve" element={<ApproveEmployees />} />
           <Route path="rewards" element={<ManageRewards />} />
           <Route path="leaves" element={<LeaveRequests />} />
           <Route path="performance" element={<PerformanceTracking />} />

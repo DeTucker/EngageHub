@@ -137,6 +137,16 @@ export const getEmployeeSummary = (employeeId) => {
   return API.get(`/employees/${employeeId}/summary`);
 };
 
+// Get pending employees (HR only)
+export const getPendingEmployees = () => {
+  return API.get("/employees/pending/list");
+};
+
+// Approve employee (HR only)
+export const approveEmployee = (employeeId) => {
+  return API.post(`/employees/${employeeId}/approve`);
+};
+
 // ============================================
 // PERFORMANCE REVIEWS
 // ============================================

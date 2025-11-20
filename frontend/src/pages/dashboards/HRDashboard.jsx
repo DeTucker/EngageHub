@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
-import { LayoutDashboard, Users, Gift, FileText, TrendingUp, Settings, LogOut, Shield } from "lucide-react";
+import { LayoutDashboard, Users, Gift, FileText, TrendingUp, Settings, LogOut, Shield, UserCheck } from "lucide-react";
 
 export default function HRDashboard() {
   const navigate = useNavigate();
@@ -88,6 +88,20 @@ export default function HRDashboard() {
           >
             <Users className="w-5 h-5" />
             <span className="font-medium">Manage Employees</span>
+          </NavLink>
+
+          <NavLink
+            to="approve"
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                isActive
+                  ? "bg-white text-purple-600 shadow-lg"
+                  : "text-purple-100 hover:bg-white/10 hover:text-white"
+              }`
+            }
+          >
+            <UserCheck className="w-5 h-5" />
+            <span className="font-medium">Approve Employees</span>
           </NavLink>
 
           <NavLink
