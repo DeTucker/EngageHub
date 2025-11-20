@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { getAllEmployees } from "../../../api";
+import { Users, Search, Filter, Eye, X } from "lucide-react";
 
 function initials(name) {
   if (!name) return "NA";
@@ -57,10 +58,10 @@ export default function ManageEmployees() {
 
   if (loading) {
     return (
-      <div className="p-4 min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading employees...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600 font-medium">Loading employees...</p>
         </div>
       </div>
     );
@@ -69,146 +70,189 @@ export default function ManageEmployees() {
   if (error) {
     return (
       <div className="p-4">
-        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
-          {error}
+        <div className="bg-gradient-to-r from-red-50 to-red-100 border border-red-200 text-red-700 p-5 rounded-xl shadow-lg">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">⚠️</span>
+            <span className="font-medium">{error}</span>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-4">
-      <header className="flex items-start justify-between mb-4">
-        <div>
-          <h1 className="text-xl font-semibold text-gray-900">Manage Employees</h1>
-          <p className="text-sm text-gray-500">View and manage employee information.</p>
+    <div>
+      {/* Header */}
+      <header className="mb-8">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl flex items-center justify-center shadow-lg">
+            <Users className="w-7 h-7 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+              Manage Employees
+            </h1>
+            <p className="text-gray-600 mt-1">
+              View and manage employee information and profiles
+            </p>
+          </div>
         </div>
       </header>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm p-4 mb-4 flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search employees..."
-          className="px-3 py-2 border rounded-md w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-blue-200"
-        />
-        <select
-          value={roleFilter}
-          onChange={(e) => setRoleFilter(e.target.value)}
-          className="px-3 py-2 border rounded-md w-full md:w-48"
-        >
-          {roles.map((r) => (
-            <option key={r}>{r}</option>
-          ))}
-        </select>
+      <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg p-6 mb-8 border border-gray-100">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by name or email..."
+              className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition"
+            />
+          </div>
+          <div className="relative">
+            <Filter className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <select
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value)}
+              className="w-full md:w-56 pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition appearance-none bg-white cursor-pointer"
+            >
+              {roles.map((r) => (
+                <option key={r}>{r}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="mt-4 text-sm text-gray-600">
+          Showing <span className="font-bold text-blue-600">{filtered.length}</span> of {employees.length} employees
+        </div>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-lg shadow-sm overflow-x-auto">
-        <table className="min-w-full">
-          <thead className="bg-gray-50 text-left">
-            <tr>
-              <th className="px-4 py-3 text-sm text-gray-600">Employee</th>
-              <th className="px-4 py-3 text-sm text-gray-600">Role</th>
-              <th className="px-4 py-3 text-sm text-gray-600">Department</th>
-              <th className="px-4 py-3 text-sm text-gray-600">Joined</th>
-              <th className="px-4 py-3 text-sm text-gray-600">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
-                  No employees found.
-                </td>
+      <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
+            <thead>
+              <tr className="border-b-2 border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
+                <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">Employee</th>
+                <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">Role</th>
+                <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">Department</th>
+                <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">Joined</th>
+                <th className="px-6 py-4 text-left text-sm font-bold text-gray-700">Actions</th>
               </tr>
-            ) : (
-              filtered.map((e, idx) => {
-                const colorClass = AVATAR_COLORS[idx % AVATAR_COLORS.length];
-                return (
-                  <tr key={e.email} className="border-t">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`h-10 w-10 rounded-full flex items-center justify-center font-medium ${colorClass}`}
-                        >
-                          {initials(e.full_name)}
-                        </div>
-                        <div>
-                          <div className="text-sm font-semibold text-gray-900">{e.full_name}</div>
-                          <div className="text-xs text-gray-500">{e.email}</div>
-                        </div>
+            </thead>
+            <tbody>
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-16 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                        <Users className="w-8 h-8 text-gray-400" />
                       </div>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{e.role}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{e.department || "N/A"}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">
-                      {e.date_of_joining ? new Date(e.date_of_joining).toLocaleDateString() : "N/A"}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">
-                      <div className="flex gap-2">
+                      <p className="text-gray-500 text-lg font-medium">No employees found</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((e, idx) => {
+                  const colorClass = AVATAR_COLORS[idx % AVATAR_COLORS.length];
+                  return (
+                    <tr key={e.email} className="border-b border-gray-100 hover:bg-blue-50/50 transition">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`h-12 w-12 rounded-xl flex items-center justify-center font-bold text-sm ${colorClass} shadow-md`}
+                          >
+                            {initials(e.full_name)}
+                          </div>
+                          <div>
+                            <div className="text-sm font-bold text-gray-900">{e.full_name}</div>
+                            <div className="text-xs text-gray-500">{e.email}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+                          {e.role}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700 font-medium">{e.department || "N/A"}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">
+                        {e.date_of_joining ? new Date(e.date_of_joining).toLocaleDateString() : "N/A"}
+                      </td>
+                      <td className="px-6 py-4">
                         <button
                           onClick={() => setSelected(e)}
-                          className="px-3 py-1 text-sm rounded-md border hover:bg-gray-50"
+                          className="group flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition"
                         >
+                          <Eye className="w-4 h-4" />
                           View
                         </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Modal */}
       {selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div
-            className="absolute inset-0 bg-black/40"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setSelected(null)}
           />
-          <div className="relative bg-white rounded-lg shadow-lg max-w-lg w-full p-6 z-10">
-            <header className="flex items-start justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">{selected.full_name}</h2>
-                <p className="text-sm text-gray-500">{selected.role}</p>
+          <div className="relative bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-2xl max-w-lg w-full p-8 z-10 border border-gray-200 animate-in zoom-in-95 duration-200">
+            <header className="flex items-start justify-between mb-6">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                  {initials(selected.full_name)}
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">{selected.full_name}</h2>
+                  <p className="text-sm text-blue-600 font-medium">{selected.role}</p>
+                </div>
               </div>
               <button
                 onClick={() => setSelected(null)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </header>
 
-            <div className="mt-4 text-sm text-gray-700 space-y-2">
-              <p>
-                <span className="font-semibold">Department:</span>{" "}
-                {selected.department || "N/A"}
-              </p>
-              <p>
-                <span className="font-semibold">Email:</span> {selected.email}
-              </p>
-              <p>
-                <span className="font-semibold">Phone:</span> {selected.phone_number || "N/A"}
-              </p>
-              <p>
-                <span className="font-semibold">Joined:</span>{" "}
-                {selected.date_of_joining 
-                  ? new Date(selected.date_of_joining).toLocaleDateString() 
-                  : "N/A"}
-              </p>
+            <div className="space-y-4 text-sm">
+              <div className="p-4 bg-white rounded-xl border border-gray-200">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Department</p>
+                <p className="text-base font-medium text-gray-900">{selected.department || "Not specified"}</p>
+              </div>
+              <div className="p-4 bg-white rounded-xl border border-gray-200">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Email</p>
+                <p className="text-base font-medium text-gray-900">{selected.email}</p>
+              </div>
+              <div className="p-4 bg-white rounded-xl border border-gray-200">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Phone</p>
+                <p className="text-base font-medium text-gray-900">{selected.phone_number || "Not specified"}</p>
+              </div>
+              <div className="p-4 bg-white rounded-xl border border-gray-200">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Date Joined</p>
+                <p className="text-base font-medium text-gray-900">
+                  {selected.date_of_joining 
+                    ? new Date(selected.date_of_joining).toLocaleDateString() 
+                    : "Not specified"}
+                </p>
+              </div>
             </div>
 
-            <footer className="mt-6 flex justify-end">
+            <footer className="mt-8 flex justify-end">
               <button
                 onClick={() => setSelected(null)}
-                className="px-3 py-1 rounded-md border"
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl hover:shadow-xl transition-all duration-300 hover:scale-105 font-medium"
               >
                 Close
               </button>
