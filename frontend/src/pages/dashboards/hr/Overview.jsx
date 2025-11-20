@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getEmployeeStatistics, getLeaveStatistics } from "../../../api";
-import { Users, Award, CalendarCheck, TrendingUp } from "lucide-react";
+import { Users, Award, CalendarCheck, TrendingUp, Shield, Clock } from "lucide-react";
 
 export default function Overview() {
   const [loading, setLoading] = useState(true);
@@ -122,13 +122,25 @@ export default function Overview() {
       )}
 
       {/* Recent Activity */}
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white rounded-lg shadow-sm p-6">
         <h2 className="text-lg font-semibold mb-4 text-gray-700">System Statistics</h2>
         <ul className="space-y-3 text-gray-600">
-          <li>👥 <strong>{stats.total_employees}</strong> active employees</li>
-          <li>👔 <strong>{stats.total_hr}</strong> HR managers</li>
-          <li>⏳ <strong>{stats.pending_leaves}</strong> leave requests pending approval</li>
-          <li>📈 <strong>{stats.recent_reviews}</strong> performance reviews in last 90 days</li>
+          <li className="flex items-center gap-2">
+            <Users className="w-5 h-5 text-indigo-600" />
+            <span><strong>{stats.total_employees}</strong> active employees</span>
+          </li>
+          <li className="flex items-center gap-2">
+            <Shield className="w-5 h-5 text-indigo-600" />
+            <span><strong>{stats.total_hr}</strong> HR managers</span>
+          </li>
+          <li className="flex items-center gap-2">
+            <Clock className="w-5 h-5 text-yellow-600" />
+            <span><strong>{stats.pending_leaves}</strong> leave requests pending approval</span>
+          </li>
+          <li className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-green-600" />
+            <span><strong>{stats.recent_reviews}</strong> performance reviews in last 90 days</span>
+          </li>
         </ul>
       </div>
     </div>

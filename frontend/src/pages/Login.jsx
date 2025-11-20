@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom"; // 👈 added Link
 import Cookies from "js-cookie";
 import { userLogin } from "../api";
@@ -10,7 +10,18 @@ function Login() {
   });
   const [showPassword, setShowPassword] = useState(false); // 👈 toggle password
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("error"); // "error" or "info"
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if session expired
+    const sessionExpired = sessionStorage.getItem("session_expired");
+    if (sessionExpired === "true") {
+      setMessage("Your session has expired. Please login again.");
+      setMessageType("info");
+      sessionStorage.removeItem("session_expired");
+    }
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -22,10 +33,12 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
+    setMessageType("error");
 
     try {
       const res = await userLogin(formData);
       setMessage(res.data.message || "Login successful!");
+      setMessageType("success");
 
       // ✅ Store token in cookie
       Cookies.set("access_token", res.data.access_token, {
@@ -47,9 +60,11 @@ function Login() {
         navigate("/dashboard/hr");
       } else {
         setMessage("Unknown role. Contact admin.");
+        setMessageType("error");
       }
     } catch (err) {
       setMessage(err.response?.data?.detail || "Login failed. Try again.");
+      setMessageType("error");
     }
   };
 
@@ -64,7 +79,17 @@ function Login() {
         </h2>
 
         {message && (
-          <p className="mb-4 text-center text-sm text-red-500">{message}</p>
+          <div
+            className={`mb-4 p-3 rounded-lg text-center text-sm ${
+              messageType === "error"
+                ? "bg-red-50 border border-red-200 text-red-700"
+                : messageType === "info"
+                ? "bg-blue-50 border border-blue-200 text-blue-700"
+                : "bg-green-50 border border-green-200 text-green-700"
+            }`}
+          >
+            {message}
+          </div>
         )}
 
         {/* Email */}

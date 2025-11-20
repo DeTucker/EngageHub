@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getMyPerformanceReviews } from "../../../api";
+import { BarChart3 } from "lucide-react";
 
 export default function Performance() {
   const [loading, setLoading] = useState(true);
@@ -57,10 +58,15 @@ export default function Performance() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-2">📊 Performance Overview</h1>
-      <p className="text-gray-600 mb-6">
-        Review your performance ratings, manager feedback, and goals.
-      </p>
+      <div className="flex items-center gap-3 mb-4">
+        <BarChart3 className="w-8 h-8 text-indigo-600" />
+        <div>
+          <h1 className="text-2xl font-bold">Performance Overview</h1>
+          <p className="text-gray-600 text-sm">
+            Review your performance ratings, manager feedback, and goals.
+          </p>
+        </div>
+      </div>
       {/* Summary Section */}
       <div className="grid md:grid-cols-3 gap-4 mb-8">
         <div className="bg-white shadow rounded-lg p-4 text-center">

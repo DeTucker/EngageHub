@@ -12,6 +12,34 @@ API.interceptors.request.use((req) => {
   return req;
 });
 
+// Handle token expiration and authentication errors
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      const errorDetail = error.response?.data?.detail;
+
+      // Check if it's an authentication error
+      if (
+        errorDetail === "Could not validate credentials" ||
+        errorDetail === "Invalid authentication credentials" ||
+        errorDetail === "Not authenticated"
+      ) {
+        // Clear cookies
+        Cookies.remove("access_token");
+        Cookies.remove("user");
+
+        // Store session expired message
+        sessionStorage.setItem("session_expired", "true");
+
+        // Redirect to login
+        window.location.href = "/login";
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 //API calls
 
 // ============ Authentication ============
