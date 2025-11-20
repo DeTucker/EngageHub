@@ -128,6 +128,11 @@ export const getPerformanceStatistics = () => {
   return API.get("/performance/statistics");
 };
 
+// Create performance review (HR only)
+export const createPerformanceReview = (reviewData) => {
+  return API.post("/performance/", reviewData);
+};
+
 // ============================================
 // REWARDS
 // ============================================

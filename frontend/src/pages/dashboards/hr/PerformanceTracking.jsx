@@ -1,12 +1,24 @@
 import { useState, useEffect } from "react";
-import { getAllPerformanceReviews, getPerformanceStatistics } from "../../../api";
-import { TrendingUp, Award, AlertCircle, BarChart3 } from "lucide-react";
+import { getAllPerformanceReviews, getPerformanceStatistics, createPerformanceReview, getAllEmployees, getCurrentUser } from "../../../api";
+import { TrendingUp, Award, AlertCircle, BarChart3, Plus, X } from "lucide-react";
 
 export default function PerformanceTracking() {
   const [reviews, setReviews] = useState([]);
   const [statistics, setStatistics] = useState(null);
+  const [employees, setEmployees] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    employee_id: "",
+    employee_email: "",
+    review_period: "",
+    rating: 3.0,
+    feedback: "",
+    goals: "",
+  });
 
   useEffect(() => {
     fetchData();
@@ -14,18 +26,27 @@ export default function PerformanceTracking() {
 
   const fetchData = async () => {
     try {
-      const [reviewsRes, statsRes] = await Promise.all([
+      const [reviewsRes, statsRes, employeesRes, userRes] = await Promise.all([
         getAllPerformanceReviews(),
         getPerformanceStatistics(),
+        getAllEmployees(),
+        getCurrentUser(),
       ]);
       setReviews(reviewsRes.data.data || []);
       setStatistics(statsRes.data);
+      setEmployees(employeesRes.data || []);
+      setCurrentUser(userRes.data);
       setLoading(false);
     } catch (err) {
       setError(err.response?.data?.detail || "Failed to load performance data");
       setLoading(false);
     }
   };
+
+  // Filter out current HR manager from employee list
+  const selectableEmployees = employees.filter(
+    emp => emp.email !== currentUser?.email
+  );
 
   const getColor = (rating) => {
     if (rating >= 4.5) return "bg-green-500";
@@ -35,6 +56,46 @@ export default function PerformanceTracking() {
 
   const getRatingWidth = (rating) => {
     return (rating / 5) * 100;
+  };
+
+  const handleEmployeeChange = (e) => {
+    const selectedEmail = e.target.value;
+    const employee = employees.find((emp) => emp.email === selectedEmail);
+    if (employee) {
+      setFormData({
+        ...formData,
+        employee_email: employee.email,
+        employee_id: employee.id,
+      });
+    }
+  };
+
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    
+    if (!formData.employee_id || !formData.review_period || !formData.feedback) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await createPerformanceReview(formData);
+      setShowModal(false);
+      setFormData({
+        employee_id: "",
+        employee_email: "",
+        review_period: "",
+        rating: 3.0,
+        feedback: "",
+        goals: "",
+      });
+      await fetchData();
+    } catch (err) {
+      alert(err.response?.data?.detail || "Failed to create review");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (loading) {
@@ -57,9 +118,18 @@ export default function PerformanceTracking() {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="flex items-center gap-3 mb-6">
-        <BarChart3 className="w-8 h-8 text-indigo-600" />
-        <h1 className="text-2xl font-bold text-gray-800">Performance Tracking</h1>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <BarChart3 className="w-8 h-8 text-indigo-600" />
+          <h1 className="text-2xl font-bold text-gray-800">Performance Tracking</h1>
+        </div>
+        <button
+          onClick={() => setShowModal(true)}
+          className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 flex items-center gap-2"
+        >
+          <Plus className="w-5 h-5" />
+          New Review
+        </button>
       </div>
 
       {/* Summary Cards */}
@@ -202,6 +272,129 @@ export default function PerformanceTracking() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* New Review Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b">
+              <h2 className="text-xl font-semibold text-gray-800">Conduct Performance Review</h2>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitReview} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Employee *
+                </label>
+                <select
+                  value={formData.employee_email}
+                  onChange={handleEmployeeChange}
+                  required
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="">Select an employee</option>
+                  {selectableEmployees.map((emp) => (
+                    <option key={emp.email} value={emp.email}>
+                      {emp.full_name} ({emp.email})
+                    </option>
+                  ))}
+                </select>
+                {selectableEmployees.length === 0 && (
+                  <p className="text-xs text-gray-500 mt-1">No employees available for review</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Review Period *
+                </label>
+                <input
+                  type="text"
+                  value={formData.review_period}
+                  onChange={(e) => setFormData({ ...formData, review_period: e.target.value })}
+                  placeholder="e.g., Q4 2025, Annual 2025"
+                  required
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Rating (1-5) *
+                </label>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="range"
+                    min="1"
+                    max="5"
+                    step="0.5"
+                    value={formData.rating}
+                    onChange={(e) => setFormData({ ...formData, rating: parseFloat(e.target.value) })}
+                    className="flex-1"
+                  />
+                  <span className="text-lg font-semibold text-indigo-600 w-12 text-center">
+                    {formData.rating}
+                  </span>
+                </div>
+                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  <span>Poor</span>
+                  <span>Excellent</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Feedback *
+                </label>
+                <textarea
+                  value={formData.feedback}
+                  onChange={(e) => setFormData({ ...formData, feedback: e.target.value })}
+                  placeholder="Provide detailed feedback on performance, strengths, areas for improvement..."
+                  required
+                  rows={5}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Goals for Next Period
+                </label>
+                <textarea
+                  value={formData.goals}
+                  onChange={(e) => setFormData({ ...formData, goals: e.target.value })}
+                  placeholder="Set goals and objectives for the next review period..."
+                  rows={3}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex-1 bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                >
+                  {submitting ? "Submitting..." : "Submit Review"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

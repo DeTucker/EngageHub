@@ -165,3 +165,57 @@ async def get_performance_statistics(current_user: dict = Depends(get_current_us
     stats["top_performers"] = top_performers
     
     return stats
+
+
+# Create performance review (HR only)
+@router.post("/")
+async def create_performance_review(
+    review_data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Create a new performance review (HR Manager only)"""
+    if current_user.get("role") != "hr_manager":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only HR managers can create performance reviews"
+        )
+    
+    # Verify employee exists
+    try:
+        employee_id = ObjectId(review_data["employee_id"])
+    except:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid employee ID"
+        )
+    
+    employee = await db.users.find_one({"_id": employee_id})
+    if not employee:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Employee not found"
+        )
+    
+    # Create review document
+    review_doc = {
+        "employee_id": employee_id,
+        "employee_name": employee["full_name"],
+        "employee_email": employee["email"],
+        "review_period": review_data.get("review_period", ""),
+        "rating": float(review_data.get("rating", 0)),
+        "feedback": review_data.get("feedback", ""),
+        "goals": review_data.get("goals", ""),
+        "reviewer_name": current_user["full_name"],
+        "reviewer_id": current_user["id"],
+        "review_date": datetime.utcnow(),
+        "created_at": datetime.utcnow()
+    }
+    
+    result = await db.performance.insert_one(review_doc)
+    
+    # Return created review
+    created_review = await db.performance.find_one({"_id": result.inserted_id})
+    created_review["id"] = str(created_review.pop("_id"))
+    created_review["employee_id"] = str(created_review["employee_id"])
+    
+    return {"message": "Performance review created successfully", "data": created_review}

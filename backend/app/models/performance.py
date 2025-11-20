@@ -21,24 +21,20 @@ class ReviewType(str, Enum):
 class PerformanceCreate(BaseModel):
     employee_id: str
     employee_email: str
-    review_type: ReviewType
-    rating: PerformanceRating
-    strengths: str
-    areas_for_improvement: str
-    goals: str
-    comments: str
+    review_period: str
+    rating: float
+    feedback: str
+    goals: Optional[str] = ""
     
     class Config:
         json_schema_extra = {
             "example": {
                 "employee_id": "507f1f77bcf86cd799439011",
                 "employee_email": "employee@example.com",
-                "review_type": "quarterly",
-                "rating": "good",
-                "strengths": "Strong technical skills, good team player",
-                "areas_for_improvement": "Time management",
-                "goals": "Complete certification by Q2",
-                "comments": "Overall good performance"
+                "review_period": "Q4 2025",
+                "rating": 4.5,
+                "feedback": "Strong technical skills and good team player. Needs improvement in time management.",
+                "goals": "Complete certification by Q2, Improve project delivery time"
             }
         }
 
