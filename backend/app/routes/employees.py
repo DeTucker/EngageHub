@@ -112,6 +112,10 @@ async def get_all_employees(
     
     employees = await db.users.find(query).sort("created_at", -1).to_list(500)
     
+    # Convert _id to id string
+    for emp in employees:
+        emp["id"] = str(emp["_id"])
+    
     return [UserPublic(**emp) for emp in employees]
 
 @router.get("/{employee_id}", response_model=UserPublic)

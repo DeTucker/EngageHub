@@ -18,7 +18,7 @@ class RewardCreate(BaseModel):
     recipient_email: str
     reward_type: RewardType
     title: str
-    description: str
+    description: Optional[str] = ""
     points: int = 100
     
     class Config:

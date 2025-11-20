@@ -135,6 +135,7 @@ async def create_reward(
     reward_dict = reward_data.model_dump()
     reward_dict["recipient_id"] = ObjectId(reward_data.recipient_id)
     reward_dict["awarded_by"] = current_user["id"]
+    reward_dict["date_awarded"] = datetime.utcnow()
     reward_dict["created_at"] = datetime.utcnow()
     
     result = await db.rewards.insert_one(reward_dict)

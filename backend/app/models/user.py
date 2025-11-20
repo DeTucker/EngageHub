@@ -20,6 +20,7 @@ class UserInDB(BaseModel):
     created_at: datetime = datetime.utcnow()
 
 class UserPublic(BaseModel):
+    id: Optional[str] = None
     email: EmailStr
     full_name: str
     role: str
