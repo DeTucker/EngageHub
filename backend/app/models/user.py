@@ -17,6 +17,7 @@ class UserInDB(BaseModel):
     password: str
     full_name: str
     role: str = "employee"
+    is_hr: bool = False
     is_approved: bool = False
     created_at: datetime = datetime.utcnow()
 
@@ -25,6 +26,7 @@ class UserPublic(BaseModel):
     email: EmailStr
     full_name: str
     role: str
+    is_hr: bool = False
     is_approved: bool = False
     department: Optional[str] = None
     phone: Optional[str] = None

@@ -25,6 +25,7 @@ async def signup(user: UserCreate):
         email=user.email,
         password=hash_password(user.password),
         full_name=user.full_name,
+        role="hr_manager" if is_first_user else "employee",
         is_hr=is_first_user,  # First user becomes HR manager
         is_approved=is_first_user  # First user is auto-approved
     )
