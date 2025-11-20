@@ -61,118 +61,145 @@ export default function HRDashboard() {
         )}
 
         {/* Navigation Links */}
-        <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
-          <NavLink
-            to="overview"
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                isActive
-                  ? "bg-white text-purple-600 shadow-lg"
-                  : "text-purple-100 hover:bg-white/10 hover:text-white"
-              }`
-            }
-          >
-            <LayoutDashboard className="w-5 h-5" />
-            <span className="font-medium">Dashboard Overview</span>
-          </NavLink>
+        <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
+          {/* Overview Section */}
+          <div className="mb-4">
+            <NavLink
+              to="overview"
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                  isActive
+                    ? "bg-white text-purple-600 shadow-lg scale-105"
+                    : "text-purple-100 hover:bg-white/10 hover:text-white hover:scale-102"
+                }`
+              }
+            >
+              <LayoutDashboard className="w-5 h-5" />
+              <span className="font-medium">Dashboard Overview</span>
+            </NavLink>
+          </div>
 
-          <NavLink
-            to="employees"
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                isActive
-                  ? "bg-white text-purple-600 shadow-lg"
-                  : "text-purple-100 hover:bg-white/10 hover:text-white"
-              }`
-            }
-          >
-            <Users className="w-5 h-5" />
-            <span className="font-medium">Manage Employees</span>
-          </NavLink>
+          {/* Divider */}
+          <div className="h-px bg-white/20 my-3 mx-4"></div>
 
-          <NavLink
-            to="approve"
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                isActive
-                  ? "bg-white text-purple-600 shadow-lg"
-                  : "text-purple-100 hover:bg-white/10 hover:text-white"
-              }`
-            }
-          >
-            <UserCheck className="w-5 h-5" />
-            <span className="font-medium">Approve Employees</span>
-          </NavLink>
+          {/* Employee Management Section */}
+          <div className="mb-4">
+            <p className="text-xs font-semibold text-purple-300 uppercase tracking-wider px-4 mb-2">Employee Management</p>
+            
+            <NavLink
+              to="employees"
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                  isActive
+                    ? "bg-white text-purple-600 shadow-lg scale-105"
+                    : "text-purple-100 hover:bg-white/10 hover:text-white hover:scale-102"
+                }`
+              }
+            >
+              <Users className="w-5 h-5" />
+              <span className="font-medium">All Employees</span>
+            </NavLink>
 
-          <NavLink
-            to="tasks"
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                isActive
-                  ? "bg-white text-purple-600 shadow-lg"
-                  : "text-purple-100 hover:bg-white/10 hover:text-white"
-              }`
-            }
-          >
-            <ClipboardList className="w-5 h-5" />
-            <span className="font-medium">Task Management</span>
-          </NavLink>
+            <NavLink
+              to="approve"
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                  isActive
+                    ? "bg-white text-purple-600 shadow-lg scale-105"
+                    : "text-purple-100 hover:bg-white/10 hover:text-white hover:scale-102"
+                }`
+              }
+            >
+              <UserCheck className="w-5 h-5" />
+              <span className="font-medium">Approve New Hires</span>
+            </NavLink>
 
-          <NavLink
-            to="rewards"
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                isActive
-                  ? "bg-white text-purple-600 shadow-lg"
-                  : "text-purple-100 hover:bg-white/10 hover:text-white"
-              }`
-            }
-          >
-            <Gift className="w-5 h-5" />
-            <span className="font-medium">Manage Rewards</span>
-          </NavLink>
+            <NavLink
+              to="tasks"
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                  isActive
+                    ? "bg-white text-purple-600 shadow-lg scale-105"
+                    : "text-purple-100 hover:bg-white/10 hover:text-white hover:scale-102"
+                }`
+              }
+            >
+              <ClipboardList className="w-5 h-5" />
+              <span className="font-medium">Assign Tasks</span>
+            </NavLink>
+          </div>
 
-          <NavLink
-            to="leaves"
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                isActive
-                  ? "bg-white text-purple-600 shadow-lg"
-                  : "text-purple-100 hover:bg-white/10 hover:text-white"
-              }`
-            }
-          >
-            <FileText className="w-5 h-5" />
-            <span className="font-medium">Review Leave Requests</span>
-          </NavLink>
+          {/* Divider */}
+          <div className="h-px bg-white/20 my-3 mx-4"></div>
 
-          <NavLink
-            to="performance"
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                isActive
-                  ? "bg-white text-purple-600 shadow-lg"
-                  : "text-purple-100 hover:bg-white/10 hover:text-white"
-              }`
-            }
-          >
-            <TrendingUp className="w-5 h-5" />
-            <span className="font-medium">Employee Performance</span>
-          </NavLink>
+          {/* Monitoring Section */}
+          <div className="mb-4">
+            <p className="text-xs font-semibold text-purple-300 uppercase tracking-wider px-4 mb-2">Monitoring</p>
+            
+            <NavLink
+              to="performance"
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                  isActive
+                    ? "bg-white text-purple-600 shadow-lg scale-105"
+                    : "text-purple-100 hover:bg-white/10 hover:text-white hover:scale-102"
+                }`
+              }
+            >
+              <TrendingUp className="w-5 h-5" />
+              <span className="font-medium">Performance</span>
+            </NavLink>
 
-          <NavLink
-            to="settings"
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                isActive
-                  ? "bg-white text-purple-600 shadow-lg"
-                  : "text-purple-100 hover:bg-white/10 hover:text-white"
-              }`
-            }
-          >
-            <Settings className="w-5 h-5" />
-            <span className="font-medium">Settings</span>
-          </NavLink>
+            <NavLink
+              to="leaves"
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                  isActive
+                    ? "bg-white text-purple-600 shadow-lg scale-105"
+                    : "text-purple-100 hover:bg-white/10 hover:text-white hover:scale-102"
+                }`
+              }
+            >
+              <FileText className="w-5 h-5" />
+              <span className="font-medium">Leave Requests</span>
+            </NavLink>
+
+            <NavLink
+              to="rewards"
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                  isActive
+                    ? "bg-white text-purple-600 shadow-lg scale-105"
+                    : "text-purple-100 hover:bg-white/10 hover:text-white hover:scale-102"
+                }`
+              }
+            >
+              <Gift className="w-5 h-5" />
+              <span className="font-medium">Rewards</span>
+            </NavLink>
+          </div>
+
+          {/* Divider */}
+          <div className="h-px bg-white/20 my-3 mx-4"></div>
+
+          {/* System Section */}
+          <div>
+            <p className="text-xs font-semibold text-purple-300 uppercase tracking-wider px-4 mb-2">System</p>
+            
+            <NavLink
+              to="settings"
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                  isActive
+                    ? "bg-white text-purple-600 shadow-lg scale-105"
+                    : "text-purple-100 hover:bg-white/10 hover:text-white hover:scale-102"
+                }`
+              }
+            >
+              <Settings className="w-5 h-5" />
+              <span className="font-medium">Settings</span>
+            </NavLink>
+          </div>
         </nav>
 
         {/* Logout Button */}
