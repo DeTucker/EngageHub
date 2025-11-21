@@ -1,31 +1,13 @@
 from fastapi import APIRouter, HTTPException, Depends
-from fastapi.security import OAuth2PasswordBearer
 from typing import List, Optional
 from datetime import datetime
 from bson import ObjectId
 from app.database import db
 from app.models.task import TaskCreate, TaskUpdate, TaskPublic, TaskInDB, TaskStatus
-from app.core.security import decode_access_token
+from app.utils.auth_helpers import get_current_user, check_hr_role
+from .notifications import create_notification
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
-
-# Helper function to get current user from token
-async def get_current_user(token: str = Depends(oauth2_scheme)):
-    payload = decode_access_token(token)
-    if not payload:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
-    
-    user = await db.users.find_one({"email": payload.get("sub")})
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    return user
-
-# Helper function to check HR role
-def check_hr_role(user: dict):
-    if user["role"] != "hr_manager":
-        raise HTTPException(status_code=403, detail="Access denied. HR Manager role required.")
 
 # -------------------
 # Task Creation (HR/Manager)
@@ -65,6 +47,15 @@ async def create_task(
     # Fetch created task
     created_task = await db.tasks.find_one({"_id": result.inserted_id})
     created_task["id"] = str(created_task["_id"])
+    
+    # Create notification for the assigned employee
+    await create_notification(
+        user_id=str(assigned_employee["_id"]),
+        notification_type="task_assigned",
+        title="New Task Assigned",
+        message=f"You have been assigned a new task: {task_data.title}",
+        link="/employee/tasks"
+    )
     
     return TaskPublic(**created_task)
 

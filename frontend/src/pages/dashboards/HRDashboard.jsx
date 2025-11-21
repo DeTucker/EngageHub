@@ -2,6 +2,7 @@ import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { LayoutDashboard, Users, Gift, FileText, TrendingUp, Settings, LogOut, Shield, UserCheck, ClipboardList } from "lucide-react";
+import NotificationDropdown from "../../components/NotificationDropdown";
 
 export default function HRDashboard() {
   const navigate = useNavigate();
@@ -216,6 +217,10 @@ export default function HRDashboard() {
 
       {/* Main Content */}
       <main className="flex-1 p-8 overflow-y-auto">
+        {/* Top Bar with Notification */}
+        <div className="flex justify-end mb-4">
+          <NotificationDropdown />
+        </div>
         <Outlet />
       </main>
     </div>

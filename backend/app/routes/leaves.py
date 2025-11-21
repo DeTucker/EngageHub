@@ -1,26 +1,13 @@
 from fastapi import APIRouter, HTTPException, Depends, status
-from fastapi.security import OAuth2PasswordBearer
 from typing import List
 from datetime import datetime, date
 from bson import ObjectId
 from app.database import db
 from app.models.leave import LeaveCreate, LeaveUpdate, LeavePublic, LeaveInDB, LeaveStatus
-from app.core.security import decode_access_token
+from app.utils.auth_helpers import get_current_user
+from .notifications import create_notification
 
 router = APIRouter(prefix="/leaves", tags=["Leaves"])
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
-
-# Helper function to get current user from token
-async def get_current_user(token: str = Depends(oauth2_scheme)):
-    payload = decode_access_token(token)
-    if not payload:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
-    
-    user = await db.users.find_one({"email": payload.get("sub")})
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    return user
 
 # Helper function to calculate business days
 def calculate_days(start_date, end_date):
@@ -188,6 +175,16 @@ async def update_leave_status(
     
     # Get updated leave
     updated_leave = await db.leaves.find_one({"_id": obj_id})
+    
+    # Create notification for the employee
+    status_text = "approved" if update.status == "approved" else "rejected"
+    await create_notification(
+        user_id=leave["user_id"],
+        notification_type=f"leave_{status_text}",
+        title=f"Leave Request {status_text.capitalize()}",
+        message=f"Your {leave['leave_type']} leave request has been {status_text}.",
+        link="/employee/leave"
+    )
     
     return LeavePublic(
         id=str(updated_leave["_id"]),

@@ -3,6 +3,7 @@ import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { Award, TrendingUp, User, Calendar, LogOut, Menu, CheckSquare } from "lucide-react";
 import PendingApproval from "../../components/PendingApproval";
+import NotificationDropdown from "../../components/NotificationDropdown";
 
 export default function EmployeeDashboard() {
   const navigate = useNavigate();
@@ -173,6 +174,10 @@ export default function EmployeeDashboard() {
 
       {/* Main Content */}
       <main className="flex-1 p-8 overflow-y-auto">
+        {/* Top Bar with Notification */}
+        <div className="flex justify-end mb-4">
+          <NotificationDropdown />
+        </div>
         <Outlet />
       </main>
     </div>

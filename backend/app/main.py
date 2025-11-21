@@ -9,7 +9,7 @@ from app.core.middleware import setup_middlewares
 from app.database import init_db
 
 #register routes
-from app.routes import auth, leaves, employees, performance, rewards, tasks
+from app.routes import auth, leaves, employees, performance, rewards, tasks, notifications
 
 app = FastAPI(title="EngageHub API", version="1.0.0")
 
@@ -35,6 +35,7 @@ app.include_router(employees.router)
 app.include_router(performance.router)
 app.include_router(rewards.router)
 app.include_router(tasks.router)
+app.include_router(notifications.router)
 
 @app.get("/")
 async def root():

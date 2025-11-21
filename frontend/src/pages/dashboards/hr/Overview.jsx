@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getEmployeeStatistics, getLeaveStatistics, getTaskStatistics } from "../../../api";
-import { Users, Award, CalendarCheck, TrendingUp, Shield, Clock, CheckSquare, AlertCircle } from "lucide-react";
+import { Users, Award, CalendarCheck, TrendingUp, Shield, Clock, CheckSquare, AlertCircle, BarChart3, PieChart } from "lucide-react";
+import { BarChart, Bar, PieChart as RePieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, LineChart, Line } from "recharts";
 
 export default function Overview() {
   const [loading, setLoading] = useState(true);
@@ -185,6 +186,104 @@ export default function Overview() {
               <p className="text-xs text-gray-500">Past due</p>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Charts Section */}
+      {taskStats && leaveStats && (
+        <div className="grid lg:grid-cols-2 gap-8 mb-8">
+          {/* Task Status Distribution Chart */}
+          <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg p-8 border border-gray-100">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+              <PieChart className="w-6 h-6 text-indigo-600" />
+              Task Distribution
+            </h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <RePieChart>
+                <Pie
+                  data={[
+                    { name: 'Pending', value: taskStats.pending, color: '#f59e0b' },
+                    { name: 'In Progress', value: taskStats.in_progress, color: '#3b82f6' },
+                    { name: 'Completed', value: taskStats.completed, color: '#10b981' },
+                    { name: 'Overdue', value: taskStats.overdue, color: '#ef4444' }
+                  ]}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {[
+                    { name: 'Pending', value: taskStats.pending, color: '#f59e0b' },
+                    { name: 'In Progress', value: taskStats.in_progress, color: '#3b82f6' },
+                    { name: 'Completed', value: taskStats.completed, color: '#10b981' },
+                    { name: 'Overdue', value: taskStats.overdue, color: '#ef4444' }
+                  ].map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </RePieChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Leave Status Distribution Chart */}
+          <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg p-8 border border-gray-100">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+              <BarChart3 className="w-6 h-6 text-purple-600" />
+              Leave Status Overview
+            </h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart
+                data={[
+                  { status: 'Pending', count: leaveStats.by_status.pending || 0, fill: '#f59e0b' },
+                  { status: 'Approved', count: leaveStats.by_status.approved || 0, fill: '#10b981' },
+                  { status: 'Rejected', count: leaveStats.by_status.rejected || 0, fill: '#ef4444' }
+                ]}
+              >
+                <XAxis dataKey="status" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="count" fill="#8884d8" radius={[8, 8, 0, 0]}>
+                  {[
+                    { status: 'Pending', count: leaveStats.by_status.pending || 0, fill: '#f59e0b' },
+                    { status: 'Approved', count: leaveStats.by_status.approved || 0, fill: '#10b981' },
+                    { status: 'Rejected', count: leaveStats.by_status.rejected || 0, fill: '#ef4444' }
+                  ].map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
+
+      {/* Leave Types Chart */}
+      {leaveStats && leaveStats.by_type.length > 0 && (
+        <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg p-8 mb-8 border border-gray-100">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+            <TrendingUp className="w-6 h-6 text-green-600" />
+            Leave Days by Type
+          </h2>
+          <ResponsiveContainer width="100%" height={350}>
+            <BarChart
+              data={leaveStats.by_type.map(item => ({
+                type: item.type.replace('_', ' ').toUpperCase(),
+                days: item.total_days,
+                requests: item.count
+              }))}
+            >
+              <XAxis dataKey="type" angle={-45} textAnchor="end" height={100} />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="days" fill="#8b5cf6" name="Total Days" radius={[8, 8, 0, 0]} />
+              <Bar dataKey="requests" fill="#06b6d4" name="Requests" radius={[8, 8, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       )}
 
