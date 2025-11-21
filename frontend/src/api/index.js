@@ -16,25 +16,17 @@ API.interceptors.request.use((req) => {
 API.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Catch all 401 errors (Unauthorized)
     if (error.response?.status === 401) {
-      const errorDetail = error.response?.data?.detail;
+      // Clear cookies
+      Cookies.remove("access_token");
+      Cookies.remove("user");
 
-      // Check if it's an authentication error
-      if (
-        errorDetail === "Could not validate credentials" ||
-        errorDetail === "Invalid authentication credentials" ||
-        errorDetail === "Not authenticated"
-      ) {
-        // Clear cookies
-        Cookies.remove("access_token");
-        Cookies.remove("user");
+      // Store session expired message
+      sessionStorage.setItem("session_expired", "true");
 
-        // Store session expired message
-        sessionStorage.setItem("session_expired", "true");
-
-        // Redirect to login
-        window.location.href = "/login";
-      }
+      // Redirect to login
+      window.location.href = "/login";
     }
     return Promise.reject(error);
   }
