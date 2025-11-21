@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom"; // 👈 added Link
+import { useNavigate, Link } from "react-router-dom";
 import Cookies from "js-cookie";
 import { userLogin } from "../api";
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Shield, Home } from "lucide-react";
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -69,14 +70,35 @@ function Login() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 to-blue-200">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm"
+    <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 flex items-center justify-center p-6 relative">
+      {/* Back to Home */}
+      <Link
+        to="/"
+        className="absolute top-6 left-6 flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-md rounded-xl shadow-md hover:shadow-lg transition-all duration-300 text-gray-700 hover:text-indigo-600"
       >
-        <h2 className="text-3xl font-bold mb-6 text-center text-blue-600">
-          Welcome Back
-        </h2>
+        <Home className="w-4 h-4" />
+        <span className="text-sm font-medium">Home</span>
+      </Link>
+
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <div className="flex items-center justify-center gap-3 mb-8">
+          <div className="w-12 h-12 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+            <Shield className="w-7 h-7 text-white" />
+          </div>
+          <span className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            EngageHub
+          </span>
+        </div>
+
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/60"
+        >
+          <h2 className="text-3xl font-bold mb-2 text-center bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            Welcome Back
+          </h2>
+          <p className="text-center text-gray-600 mb-8 text-sm">Sign in to continue to your dashboard</p>
 
         {message && (
           <div
@@ -147,15 +169,16 @@ function Login() {
 
         {/* Signup link */}
         <p className="mt-6 text-center text-sm text-gray-600">
-          Don’t have an account?{" "}
+          Don't have an account?{" "}
           <Link
             to="/signup"
-            className="text-blue-500 font-semibold hover:underline"
+            className="text-indigo-600 font-semibold hover:text-indigo-700 transition-colors"
           >
-            Sign up
+            Create one now
           </Link>
         </p>
       </form>
+      </div>
     </div>
   );
 }
